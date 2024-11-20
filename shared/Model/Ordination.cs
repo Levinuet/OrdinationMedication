@@ -39,6 +39,7 @@ public abstract class Ordination {
     /// Returnerer den gennemsnitlige dosis givet pr dag i den periode ordinationen er gyldig
     /// </summary>
     public abstract double doegnDosis();
+    
 
     /// <summary>
     /// Returnerer ordinationstypen som en String
