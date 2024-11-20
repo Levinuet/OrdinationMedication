@@ -21,12 +21,33 @@ public class DagligSkæv : Ordination {
 		return base.antalDage() * doegnDosis();
 	}
 
-	public override double doegnDosis() {
-		// TODO: Implement!
-        return -1;
-	}
+    public override double doegnDosis()
+    {
+        int antalDage = base.antalDage();
 
-	public override String getType() {
+        if (antalDage <= 0)
+        {
+            throw new InvalidOperationException("Antal dage must be greater than zero.");
+        }
+
+        double samletDosis = 0;
+
+        if (doser != null && doser.Count > 0)
+        {
+            foreach (Dosis dosis in doser)
+            {
+                samletDosis += dosis.antal;
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException("Doser list must not be empty.");
+        }
+
+        return samletDosis / antalDage;
+    }
+
+    public override String getType() {
 		return "DagligSkæv";
 	}
 }
