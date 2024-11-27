@@ -17,25 +17,41 @@ public class PN : Ordination {
     /// Returner false ellers og datoen givesDen ignoreres
     /// </summary>
     public bool givDosis(Dato givesDen) {
-        // TODO: Implement!
+        
+        if (givesDen.dato >= startDen && givesDen.dato <= slutDen)
+        {
+            dates.Add(givesDen);
+            return true;
+        }
         return false;
     }
 
-    public override double doegnDosis() {
-    	// TODO: Implement!
-        return -1;
+    public override double doegnDosis()
+    {
+        // Beregn antallet af dage i perioden
+        int antalDage = (slutDen - startDen).Days + 1; // +1 for at inkludere slutdatoen
+
+        // Beregn den samlede dosis (antallet af gange dosis er givet gange antal enheder)
+        double samletDosis = dates.Count() * antalEnheder;
+
+        // Beregn og returner den gennemsnitlige dosis per dag
+        return samletDosis / antalDage;
     }
 
 
-    public override double samletDosis() {
+
+    public override double samletDosis() 
+    {
         return dates.Count() * antalEnheder;
     }
 
-    public int getAntalGangeGivet() {
+    public int getAntalGangeGivet() 
+    {
         return dates.Count();
     }
 
-	public override String getType() {
+	public override String getType() 
+    {
 		return "PN";
 	}
 }

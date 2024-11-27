@@ -21,8 +21,9 @@ public abstract class Ordination {
     /// Antal hele dage mellem startdato og slutdato. Begge dage inklusive.
     /// </summary>
     public int antalDage() {
-        // TODO: Implement!
-        return -1;
+        if (slutDen < startDen)
+            throw new InvalidOperationException("Slutdato kan ikke være før startdato.");
+        return (slutDen.Date - startDen.Date).Days +1;
     }
 
     public override String ToString() {
@@ -38,6 +39,7 @@ public abstract class Ordination {
     /// Returnerer den gennemsnitlige dosis givet pr dag i den periode ordinationen er gyldig
     /// </summary>
     public abstract double doegnDosis();
+    
 
     /// <summary>
     /// Returnerer ordinationstypen som en String

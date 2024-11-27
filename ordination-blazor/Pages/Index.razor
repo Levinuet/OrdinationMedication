@@ -1,11 +1,134 @@
 ﻿@page "/"
-
 @using ordinationsapp.Data;
-
 @inject ApiService apiService
 
 <PageTitle>Ordinationsapp</PageTitle>
 
-<h1>Velkommen til Medicinordination</h1>
+<div class="hero-section mb-5">
+    <div class="container py-5">
+        <h1 class="display-4 mb-3">Velkommen til Medicinordination</h1>
+        <p class="lead text-muted">Administrer medicin ordinationer sikkert og effektivt</p>
+    </div>
+</div>
 
-<p>Vælg en af mulighederne oppe fra menuen.</p>
+<div class="container">
+    <div class="row g-4">
+        <!-- Opret ordination card -->
+        <div class="col-md-4">
+            <div class="card h-100 feature-card shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="icon-wrapper mb-4">
+                        <i class="bi bi-plus-circle-fill text-primary"></i>
+                    </div>
+                    <h3 class="card-title h4">Opret ordination</h3>
+                    <p class="card-text flex-grow-1">Opret en ny ordination for en patient med få klik. Simpelt og sikkert.</p>
+                    <a href="/Opret" class="btn btn-primary mt-3">
+                        <span>Opret ny</span>
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vis ordinationer card -->
+        <div class="col-md-4">
+            <div class="card h-100 feature-card shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="icon-wrapper mb-4">
+                        <i class="bi bi-eye-fill text-success"></i>
+                    </div>
+                    <h3 class="card-title h4">Vis ordinationer</h3>
+                    <p class="card-text flex-grow-1">Få et klart overblik over alle eksisterende ordinationer i systemet.</p>
+                    <a href="/Vis" class="btn btn-success mt-3">
+                        <span>Se oversigt</span>
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistik card -->
+        <div class="col-md-4">
+            <div class="card h-100 feature-card shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="icon-wrapper mb-4">
+                        <i class="bi bi-bar-chart-fill text-info"></i>
+                    </div>
+                    <h3 class="card-title h4">Vis statistik</h3>
+                    <p class="card-text flex-grow-1">Analyser data og få indsigt i ordinationsmønstre gennem detaljeret statistik.</p>
+                    <a href="/Statistik" class="btn btn-info text-white mt-3">
+                        <span>Se statistik</span>
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+
+    .hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+.icon-wrapper {
+    font-size: 2.5rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+    .btn:hover {
+        transform: translateX(5px);
+    }
+
+.card-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.card-text {
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+/* Custom colors for consistency */
+.btn-primary {
+    background-color: #0d6efd;
+}
+
+.btn-success {
+    background-color: #198754;
+}
+
+.btn-info {
+    background-color: #0dcaf0;
+}
+
+</style>

@@ -1,40 +1,185 @@
 @page "/Vis"
-
 @using ordinationsapp.Data;
 @using shared.Model;
-@using ordinationsapp.Shared
+@using ordinationsapp.Shared;
 @using ordinationsapp.Model;
 @inject ApiService apiService
 
-<div class="container">
-    <h1>Vis ordinationer</h1>
-
-    <br />
-
-    <div class="row">
-        <div class="col-md-4 border p-3">
-            <h3>Vælg patient</h3>
-            <PatientList onSelectPatient="@onSelectPatient" patienter="@patienter"></PatientList>
-        </div>
-        <div class="col-md-4 border p-3">
-            <h3>Vælg ordination</h3>
-            <OrdinationList onSelectOrdination="@onSelectOrdination" ordinationer="@ordinationer"></OrdinationList>
-        </div>
-        <div class="col-md-4 border p-3">
-            @if (ordination != null && ordination.getType().Equals("PN")) {
-                var input = (PN) ordination;
-                <PNDetails pn=input></PNDetails>
-            } else if (ordination != null && ordination.getType().Equals("DagligSkæv")) {
-                var input = (DagligSkæv) ordination;
-                <SkævDetails skæv=input></SkævDetails>
-            } else if (ordination != null && ordination.getType().Equals("DagligFast")) {
-                var input = (DagligFast) ordination;
-                <FastDetails fast=input></FastDetails>
-            } 
-        </div>
+<div class="page-container">
+    <div class="header-section mb-4">
+        <h1 class="display-5">Vis ordinationer</h1>
+        <p class="text-muted lead">Vælg en patient for at se deres ordinationer</p>
     </div>
 
+    <div class="content-grid">
+        <!-- Patient Selection Panel -->
+        <div class="panel patient-panel">
+            <div class="panel-header">
+                <i class="bi bi-person-fill me-2"></i>
+                <h3>Vælg patient</h3>
+            </div>
+            <div class="panel-content">
+                <PatientList onSelectPatient="@onSelectPatient" patienter="@patienter"></PatientList>
+            </div>
+        </div>
+
+        <!-- Ordination Selection Panel -->
+        <div class="panel ordination-panel">
+            <div class="panel-header">
+                <i class="bi bi-clipboard2-pulse-fill me-2"></i>
+                <h3>Vælg ordination</h3>
+            </div>
+            <div class="panel-content">
+                @if (patient != null)
+                {
+                        <OrdinationList onSelectOrdination="@onSelectOrdination" ordinationer="@ordinationer"></OrdinationList>
+                }
+                else
+                {
+                        <div class="empty-state">
+                            <i class="bi bi-arrow-left-circle"></i>
+                            <p>Vælg først en patient</p>
+                        </div>
+                }
+            </div>
+        </div>
+
+        <!-- Details Panel -->
+        <div class="panel details-panel">
+            <div class="panel-header">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <h3>Detaljer</h3>
+            </div>
+            <div class="panel-content">
+                @if (ordination != null)
+                {
+                    @switch (ordination.getType())
+                    {
+                        case "PN":
+                                        <PNDetails pn="@((PN)ordination)"></PNDetails>
+                            break;
+                        case "DagligSkæv":
+                                        <SkævDetails skæv="@((DagligSkæv)ordination)"></SkævDetails>
+                            break;
+                        case "DagligFast":
+                                        <FastDetails fast="@((DagligFast)ordination)"></FastDetails>
+                            break;
+                    }
+                }
+                else
+                {
+                        <div class="empty-state">
+                            <i class="bi bi-arrow-left-circle"></i>
+                            <p>Vælg en ordination for at se detaljer</p>
+                        </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .page-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .header-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .panel {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: box-shadow 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .panel:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .panel-header {
+        background: #f8f9fa;
+        padding: 1rem 1.5rem;
+        border-radius: 12px 12px 0 0;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+    }
+
+    .panel-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .panel-header i {
+        font-size: 1.5rem;
+        color: #0d6efd;
+    }
+
+    .panel-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        min-height: 300px;
+    }
+
+    .empty-state {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #dee2e6;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    /* Custom scrollbar for panels */
+    .panel-content {
+        scrollbar-width: thin;
+        scrollbar-color: #dee2e6 #f8f9fa;
+    }
+
+    .panel-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .panel-content::-webkit-scrollbar-track {
+        background: #f8f9fa;
+    }
+
+    .panel-content::-webkit-scrollbar-thumb {
+        background-color: #dee2e6;
+        border-radius: 3px;
+    }
+</style>
 
 @code {
     private PatientResponse? patient;
@@ -49,18 +194,22 @@
         await UpdateList();
     }
 
-    private async Task UpdateList() {
+    private async Task UpdateList()
+    {
         if (patient == null) return;
         Console.WriteLine("Updating list");
-        
+
         OrdinationResponse? res = await apiService.GetOrdinationer();
         if (res == null) return;
-        
-        List<Ordination> pns = res.pn.ToList().Where(o => patient.ordinationer.Any(po => po == o.OrdinationId))
+
+        List<Ordination> pns = res.pn.ToList()
+            .Where(o => patient.ordinationer.Any(po => po == o.OrdinationId))
             .Cast<Ordination>().ToList();
-        List<Ordination> dagligSkaev = res.dagligSkaev.ToList().Where(o => patient.ordinationer.Any(po => po == o.OrdinationId))
+        List<Ordination> dagligSkaev = res.dagligSkaev.ToList()
+            .Where(o => patient.ordinationer.Any(po => po == o.OrdinationId))
             .Cast<Ordination>().ToList();
-        List<Ordination> dagligFast = res.dagligFast.ToList().Where(o => patient.ordinationer.Any(po => po == o.OrdinationId))
+        List<Ordination> dagligFast = res.dagligFast.ToList()
+            .Where(o => patient.ordinationer.Any(po => po == o.OrdinationId))
             .Cast<Ordination>().ToList();
 
         ordinationer.Clear();
@@ -68,13 +217,13 @@
         ordinationer.AddRange(dagligSkaev);
         ordinationer.AddRange(dagligFast);
 
-        if (ordination != null) {
-            ordination = ordinationer.Find(o => o.OrdinationId == ordination.OrdinationId);  
+        if (ordination != null)
+        {
+            ordination = ordinationer.Find(o => o.OrdinationId == ordination.OrdinationId);
         }
-
         StateHasChanged();
     }
-    
+
     private async void RefreshMe()
     {
         await UpdateList();
@@ -82,13 +231,16 @@
         StateHasChanged();
     }
 
-    private async void onSelectPatient(PatientResponse p) {
+    private async void onSelectPatient(PatientResponse p)
+    {
         this.patient = p;
         await UpdateList();
         Console.WriteLine("Selected " + p);
         StateHasChanged();
     }
-    private async void onSelectOrdination(Ordination o) {
+
+    private async void onSelectOrdination(Ordination o)
+    {
         this.ordination = o;
         await UpdateList();
         Console.WriteLine("Selected " + o);
