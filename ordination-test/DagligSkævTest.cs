@@ -29,9 +29,7 @@ public class DagligSkævTest
 
         //Assert
 
-        Assert.AreEqual(3, result);
-
+        Assert.AreEqual(9, result);
 
     }
-
 }

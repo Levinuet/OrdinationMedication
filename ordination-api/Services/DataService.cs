@@ -126,31 +126,146 @@ public class DataService
         return db.Patienter.Include(p => p.ordinationer).ToList();
     }
 
-    public List<Laegemiddel> GetLaegemidler() {
+    public List<Laegemiddel> GetLaegemidler() 
+    {
         return db.Laegemiddler.ToList();
     }
 
-    public PN OpretPN(int patientId, int laegemiddelId, double antal, DateTime startDato, DateTime slutDato) {
-        // TODO: Implement!
-        return null!;
+    public Laegemiddel GetLaegemiddel(int id)
+    {
+        return db.Laegemiddler.First(p => p.LaegemiddelId == id);
     }
 
-    public DagligFast OpretDagligFast(int patientId, int laegemiddelId, 
-        double antalMorgen, double antalMiddag, double antalAften, double antalNat, 
-        DateTime startDato, DateTime slutDato) {
+    public PN OpretPN(int patientId, int laegemiddelId, double antal, DateTime startDato, DateTime slutDato)
+    {
 
-        // TODO: Implement!
-        return null!;
+        if (patientId < 0 || laegemiddelId < 0 || antal < 0 || startDato > slutDato)
+        {
+            throw new InvalidOperationException("Id kan ikke være et negativt integer");
+            return null;
+        }
+        else
+        {
+            Patient p;
+            Laegemiddel lm;
+
+            try
+            {
+                lm = db.Laegemiddler.First(lm => lm.LaegemiddelId == laegemiddelId);
+            }
+
+            catch
+            {
+                throw new InvalidOperationException("lægemiddel findes ikke");
+            }
+
+            try
+            {
+                p = db.Patienter.First(p => p.PatientId == patientId);
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException("patient findes ikke");
+            }
+
+            PN addPN = new PN(startDato, slutDato, antal, GetLaegemiddel(laegemiddelId));
+            p.ordinationer.Add(addPN);
+            db.SaveChanges();
+
+            return addPN!;
+        }
     }
 
-    public DagligSkæv OpretDagligSkaev(int patientId, int laegemiddelId, Dosis[] doser, DateTime startDato, DateTime slutDato) {
-        // TODO: Implement!
-        return null!;
+    public DagligFast OpretDagligFast(int patientId, int laegemiddelId,
+        double antalMorgen, double antalMiddag, double antalAften, double antalNat,
+        DateTime startDato, DateTime slutDato)
+    {
+        if (patientId < 0 || laegemiddelId < 0 || startDato > slutDato)
+        {
+            throw new InvalidOperationException("Id kan ikke være et negativt integer");
+            return null;
+        }
+        else
+        {
+            Patient p;
+            Laegemiddel lm;
+
+            try
+            {
+                lm = db.Laegemiddler.First(lm => lm.LaegemiddelId == laegemiddelId);
+            }
+
+            catch
+            {
+                throw new InvalidOperationException("lægemiddel findes ikke");
+            }
+
+            try
+            {
+                p = db.Patienter.First(p => p.PatientId == patientId);
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException("patient findes ikke");
+            }
+
+            DagligFast addDagligFast = new DagligFast(startDato, slutDato, lm, antalMorgen, antalMiddag, antalAften, antalNat);
+            p.ordinationer.Add(addDagligFast);
+            db.SaveChanges();
+            return addDagligFast!;
+        }
+
     }
 
-    public string AnvendOrdination(int id, Dato dato) {
-        // TODO: Implement!
-        return null!;
+    public DagligSkæv OpretDagligSkaev(int patientId, int laegemiddelId, Dosis[] doser, DateTime startDato, DateTime slutDato)
+    {
+        if (patientId < 0 || laegemiddelId < 0 || doser.Length == 0 || startDato > slutDato)
+        {
+            throw new InvalidOperationException("Id kan ikke være et negativt integer");
+            return null;
+        }
+        else
+        {
+            Patient p;
+            Laegemiddel lm;
+
+            try
+            {
+                lm = db.Laegemiddler.First(lm => lm.LaegemiddelId == laegemiddelId);
+            }
+
+            catch
+            {
+                throw new InvalidOperationException("lægemiddel findes ikke");
+            }
+
+            try
+            {
+                p = db.Patienter.First(p => p.PatientId == patientId);
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException("patient findes ikke");
+            }
+            DagligSkæv addDagligSkæv = new DagligSkæv(startDato, slutDato, GetLaegemiddel(laegemiddelId), doser);
+            p.ordinationer.Add(addDagligSkæv);
+            db.SaveChanges();
+            return addDagligSkæv!;
+
+        }
+    }
+
+    public string AnvendOrdination(int id, Dato dato)
+    {
+        PN pn = db.PNs.Find(id);
+        bool anvendtOrdination = pn.givDosis(dato);
+        if (anvendtOrdination)
+        {
+            db.SaveChanges();
+            return "Ordination anvendt.";
+        }
+        else return "Ordination ikke anvendt.";
+
     }
 
     /// <summary>
@@ -160,9 +275,22 @@ public class DataService
     /// <param name="patient"></param>
     /// <param name="laegemiddel"></param>
     /// <returns></returns>
-	public double GetAnbefaletDosisPerDøgn(int patientId, int laegemiddelId) {
-        // TODO: Implement!
+	public double GetAnbefaletDosisPerDøgn(int patientId, int laegemiddelId)
+    {
+        Laegemiddel laegemiddel = GetLaegemiddel(laegemiddelId);
+        Patient patient = db.Patienter.Find(patientId);
+        if (laegemiddel != null && patient != null)
+        {
+            if (patient.vaegt < 25)
+            {
+                return laegemiddel.enhedPrKgPrDoegnLet * patient.vaegt;
+            }
+            else if (patient.vaegt <= 120)
+            {
+                return laegemiddel.enhedPrKgPrDoegnNormal * patient.vaegt;
+            }
+            else return laegemiddel.enhedPrKgPrDoegnTung * patient.vaegt;
+        }
         return -1;
-	}
-    
+    }
 }

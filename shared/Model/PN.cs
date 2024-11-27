@@ -40,15 +40,18 @@ public class PN : Ordination {
 
 
 
-    public override double samletDosis() {
+    public override double samletDosis() 
+    {
         return dates.Count() * antalEnheder;
     }
 
-    public int getAntalGangeGivet() {
+    public int getAntalGangeGivet() 
+    {
         return dates.Count();
     }
 
-	public override String getType() {
+	public override String getType() 
+    {
 		return "PN";
 	}
 }
