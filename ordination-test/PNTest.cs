@@ -1,10 +1,25 @@
 ﻿namespace ordination_test;
 
+using Data;
+using Microsoft.EntityFrameworkCore;
+using Service;
 using shared.Model;
 
 [TestClass]
 public class PNTest
 {
+
+    private DataService service;
+
+    [TestInitialize]
+    public void SetupBeforeEachTest()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<OrdinationContext>();
+        optionsBuilder.UseInMemoryDatabase(databaseName: "test-database");
+        var context = new OrdinationContext(optionsBuilder.Options);
+        service = new DataService(context);
+        service.SeedData();
+    }
 
     [TestMethod]
     public void GivDosisTest()
@@ -58,7 +73,72 @@ public class PNTest
         Assert.AreEqual(forventetDosis, resultat, "Den gennemsnitlige dosis per dag er ikke korrekt.");
     }
 
+    [TestMethod]
+    public void OpretPN()
+    {
+        Patient patient = service.GetPatienter().First();
+        Laegemiddel lm = service.GetLaegemidler().First();
 
+        Assert.AreEqual(4, service.GetPNs().Count());
+
+        service.OpretPN(patient.PatientId, lm.LaegemiddelId, 2, DateTime.Now, DateTime.Now.AddDays(3));
+
+        Assert.AreEqual(5, service.GetPNs().Count());
+    }
+
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidOperationException))]
+    public void OpretPNPatientIdFindesIkke()
+    {
+        Patient patient = service.GetPatienter().First();
+        Laegemiddel lm = service.GetLaegemidler().First();
+        service.OpretPN(50, lm.LaegemiddelId, 2, DateTime.Now, DateTime.Now.AddDays(3));
+        Console.WriteLine("oprettelse af PN fejlet korrekt, da patient id ikke findes");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidOperationException))]
+    public void OpretPNLægemiddelIdFindesIkke()
+    {
+        Patient patient = service.GetPatienter().First();
+        Laegemiddel lm = service.GetLaegemidler().First();
+        service.OpretPN(patient.PatientId, 50, 2, DateTime.Now, DateTime.Now.AddDays(3));
+        Console.WriteLine("oprettelse af PN fejlet korrekt, da lægemiddel id ikke findes");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidOperationException))]
+    public void OpretPNPatientIdNegativ()
+    {
+        service.OpretPN(-1, 1, 2, DateTime.Now, DateTime.Now.AddDays(3));
+        Console.WriteLine("oprettelse af PN fejlet korrekt, da patient id er negativ");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidOperationException))]
+    public void OpretPNLægemiddelIdNegativ()
+    {
+        service.OpretPN(1, -1, 2, DateTime.Now, DateTime.Now.AddDays(3));
+        Console.WriteLine("oprettelse af PN fejlet korrekt, da lægemiddel id er negativ");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidOperationException))]
+    public void OpretPNAntalNegativ()
+    {
+        service.OpretPN(1, 1, -1, DateTime.Now, DateTime.Now.AddDays(3));
+        Console.WriteLine("oprettelse af PN fejlet korrekt, da antal er negativ");
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidOperationException))]
+    public void OpretPNstartDatostørreendslutDato()
+    {
+        service.OpretPN(1, 1, 1, DateTime.Now.AddDays(3), DateTime.Now);
+
+        Console.WriteLine("oprettelse af PN fejlet korrekt, startDato kan ikke være større end slutDato");
+    }
 
 
 }

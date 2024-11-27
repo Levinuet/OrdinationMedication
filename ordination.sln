@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ordination-blazor", "ordina
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shared", "shared\shared.csproj", "{6D34AED8-B41E-4243-91F4-44F9F8596E8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ordination-test", "ordination-test\ordination-test.csproj", "{0829A912-8E45-43AE-976A-62719E748B49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ordination-test", "ordination-test\ordination-test.csproj", "{0829A912-8E45-43AE-976A-62719E748B49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
