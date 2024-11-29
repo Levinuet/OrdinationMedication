@@ -105,4 +105,15 @@ app.MapPost("/api/patienter/{id}/beregnAnbefaletDosisPerDøgn", (DataService ser
     return Results.Ok(response);
 });
 
+app.MapPost("/api/ordinationer/statistik", (DataService service, StatistikDTO dto) =>
+{
+    int antal = service.GetAntalOrdinationer(dto.VægtFra, dto.VægtTil, dto.LaegemiddelNavn);
+    return Results.Ok(new { antal });
+});
+
+app.MapGet("/api/ordinationer/totalPrLægemiddel", (DataService service) =>
+{
+    return service.GetTotalMængdeOrdineretPrLægemiddel();
+});
+
 app.Run();

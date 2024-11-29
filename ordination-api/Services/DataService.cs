@@ -65,12 +65,12 @@ public class DataService
             Laegemiddel[] lm = db.Laegemiddler.ToArray();
             Patient[] p = db.Patienter.ToArray();
 
-            ordinationer[0] = new PN(new DateTime(2024, 11, 20), new DateTime(2024, 11, 20), 123, lm[1]);    
-            ordinationer[1] = new PN(new DateTime(2024, 11, 20), new DateTime(2024, 11, 20), 3, lm[0]);    
-            ordinationer[2] = new PN(new DateTime(2024, 11, 20), new DateTime(2024, 11, 20), 5, lm[2]);    
-            ordinationer[3] = new PN(new DateTime(2024, 11, 20), new DateTime(2024, 11, 20), 123, lm[1]);
-            ordinationer[4] = new DagligFast(new DateTime(2024, 11, 20), new DateTime(2024, 11, 20), lm[1], 2, 0, 1, 0);
-            ordinationer[5] = new DagligSkæv(new DateTime(2024, 11, 20), new DateTime(2024, 11, 20), lm[2]);
+            ordinationer[0] = new PN(new DateTime(2024, 11, 29), new DateTime(2024, 11, 30), 4, lm[1]);    
+            ordinationer[1] = new PN(new DateTime(2024, 11, 29), new DateTime(2024, 11, 30), 3, lm[0]);    
+            ordinationer[2] = new PN(new DateTime(2024, 11, 29), new DateTime(2024, 11, 30), 5, lm[2]);    
+            ordinationer[3] = new PN(new DateTime(2024, 11, 29), new DateTime(2024, 11, 30), 4, lm[1]);
+            ordinationer[4] = new DagligFast(new DateTime(2024, 11, 29), new DateTime(2024, 11, 30), lm[1], 2, 0, 1, 0);
+            ordinationer[5] = new DagligSkæv(new DateTime(2024, 11, 29), new DateTime(2024, 11, 30), lm[2]);
             
             ((DagligSkæv) ordinationer[5]).doser = new Dosis[] { 
                 new Dosis(CreateTimeOnly(12, 0, 0), 0.5),
@@ -292,5 +292,50 @@ public class DataService
             else return laegemiddel.enhedPrKgPrDoegnTung * patient.vaegt;
         }
         return -1;
+    }
+
+    public int GetAntalOrdinationer(double vægtFra, double vægtTil, string laegemiddelNavn)
+    {
+        return db.Patienter
+            .Where(p => p.vaegt >= vægtFra && p.vaegt <= vægtTil)
+            .SelectMany(p => p.ordinationer)
+            .Where(o => o.laegemiddel.navn == laegemiddelNavn)
+            .Count();
+    }
+
+    public Dictionary<string, double> GetTotalMængdeOrdineretPrLægemiddel()
+    {
+        var result = new Dictionary<string, double>();
+
+        var pns = db.PNs.Include(pn => pn.laegemiddel).ToList();
+        foreach (var pn in pns)
+        {
+            if (result.ContainsKey(pn.laegemiddel.navn))
+                result[pn.laegemiddel.navn] += pn.antalEnheder;
+            else
+                result[pn.laegemiddel.navn] = pn.antalEnheder;
+        }
+
+        var dagligFaste = db.DagligFaste.Include(df => df.laegemiddel).ToList();
+        foreach (var df in dagligFaste)
+        {
+            double total = df.MorgenDosis.antal + df.MiddagDosis.antal + df.AftenDosis.antal + df.NatDosis.antal;
+            if (result.ContainsKey(df.laegemiddel.navn))
+                result[df.laegemiddel.navn] += total;
+            else
+                result[df.laegemiddel.navn] = total;
+        }
+
+        var dagligSkæve = db.DagligSkæve.Include(ds => ds.laegemiddel).ToList();
+        foreach (var ds in dagligSkæve)
+        {
+            double total = ds.doser.Sum(d => d.antal);
+            if (result.ContainsKey(ds.laegemiddel.navn))
+                result[ds.laegemiddel.navn] += total;
+            else
+                result[ds.laegemiddel.navn] = total;
+        }
+
+        return result;
     }
 }

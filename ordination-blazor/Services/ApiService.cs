@@ -23,7 +23,7 @@ public class ApiService
 
     public void CallRequestRefresh()
     {
-         RefreshRequired?.Invoke();
+        RefreshRequired?.Invoke();
     }
 
     public async Task<OrdinationResponse?> GetOrdinationer()
@@ -55,9 +55,10 @@ public class ApiService
         return newPN;
     }
 
-    public async Task<DagligFast> OpretDagligFast(int patientId, int laegemiddelId, 
-        double antalMorgen, double antalMiddag, double antalAften, double antalNat, 
-        DateTime startDato, DateTime slutDato) {
+    public async Task<DagligFast> OpretDagligFast(int patientId, int laegemiddelId,
+        double antalMorgen, double antalMiddag, double antalAften, double antalNat,
+        DateTime startDato, DateTime slutDato)
+    {
 
         string url = $"{baseAPI}ordinationer/dagligfast/";
         DagligFastDTO opret = new(patientId, laegemiddelId, antalMorgen, antalMiddag, antalAften, antalNat, startDato, slutDato);
@@ -68,7 +69,8 @@ public class ApiService
     }
 
     public async Task<DagligSkæv> OpretDagligSkaev(int patientId, int laegemiddelId,
-        Dosis[] doser, DateTime startDato, DateTime slutDato) {
+        Dosis[] doser, DateTime startDato, DateTime slutDato)
+    {
 
         string url = $"{baseAPI}ordinationer/dagligskaev/";
         DagligSkaevDTO opret = new(patientId, laegemiddelId, doser, startDato, slutDato);
@@ -88,11 +90,28 @@ public class ApiService
         return record.msg;
     }
 
-    public async Task<AnbefaletDosisDTO> GetAnbefaletDosisPerDøgn(int patientId, Laegemiddel lm) {
+    public async Task<AnbefaletDosisDTO> GetAnbefaletDosisPerDøgn(int patientId, Laegemiddel lm)
+    {
         string url = $"{baseAPI}patienter/{patientId}/beregnAnbefaletDosisPerDøgn";
         HttpResponseMessage res = await http.PostAsJsonAsync<AnbefaletDosisDTO>(url, new AnbefaletDosisDTO(lm.LaegemiddelId, -1));
         string json = res.Content.ReadAsStringAsync().Result;
         AnbefaletDosisDTO record = JsonSerializer.Deserialize<AnbefaletDosisDTO>(json)!;
         return record;
     }
+
+    public async Task<int> GetAntalOrdinationer(StatistikDTO dto)
+    {
+        string url = $"{baseAPI}ordinationer/statistik";
+        HttpResponseMessage res = await http.PostAsJsonAsync<StatistikDTO>(url, dto);
+        string json = res.Content.ReadAsStringAsync().Result;
+        var record = JsonSerializer.Deserialize<Dictionary<string, int>>(json)!;
+        return record["antal"];
+    }
+
+    public async Task<Dictionary<string, double>> GetTotalMængdeOrdineretPrLægemiddel()
+    {
+        string url = $"{baseAPI}ordinationer/totalPrLægemiddel";
+        return await http.GetFromJsonAsync<Dictionary<string, double>>(url) ?? new Dictionary<string, double>();
+    }
+
 }
