@@ -4,56 +4,121 @@
 @using shared.Model;
 @using ordinationsapp.Shared
 @using ordinationsapp.Model;
-@inject ApiService apiService
+@inject ApiService apiService   
+
+
+<style>
+    .card-header {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;   
+
+    }
+</style>
 
 <div class="container">
-    <h1>Vis statistik</h1>
+    <h1 class="mt-4">Vis statistik</h1>
 
-    <strong>Ikke implementeret 😢</strong>
-    <br />
-
-    <div class="row">
-        <div class="col-md-12 border p-3">
-            <h3>Antal ordinationer</h3>
-
-            <div class="form-group row">
-                <label for="vægtfra" class="col-sm-4 col-form-label">Vægt fra</label>
-                <div class="col-sm-8">
-                <input type="number" class="form-control" id="vægtfra">
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h3>Antal ordinationer</h3>
                 </div>
-            </div>
-
-            <div class="form-group row">
-                <label for="vægttil" class="col-sm-4 col-form-label">Vægt til</label>
-                <div class="col-sm-8">
-                <input type="number" class="form-control" id="vægttil">
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label for="lm" class="col-sm-4 col-form-label">Lægemiddel</label>
-                <div class="col-sm-8">
-                <input type="text" class="form-control" id="lm">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="vægtfra">Vægt fra:</label>
+                        <input type="number" class="form-control" id="vægtfra" @bind="vægtFra">
+                    </div>
+                    <div class="form-group">
+                        <label for="vægttil">Vægt til:</label>
+                        <input type="number" class="form-control" id="vægttil" @bind="vægtTil">
+                    </div>
+                    <div class="form-group">
+                        <label for="laegemiddel">Lægemiddel:</label>
+                        <select class="form-control" id="laegemiddel" @bind="laegemiddelId">
+                            @foreach (var laegemiddel in laegemidler)
+                            {
+                                <option value="@laegemiddel.LaegemiddelId">@laegemiddel.navn</option>
+                            }
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" @onclick="HentStatistik">Hent statistik</button>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-12 border p-3">
-            <h3>Resultat</h3>
-
-            <div class="form-group row">
-                <label for="antal" class="col-sm-4 col-form-label">Antal</label>
-                <div class="col-sm-8">
-                <input readonly type="number" class="form-control" id="antal">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h3>Resultat</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="antal">Givet til antal Patienter:</label>
+                        <input readonly type="number" class="form-control" id="antal" @bind="antal">
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h3>Total ordinationer pr. lægemiddel</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach (var item in totalPrLægemiddel)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @item.Key
+                                <span class="badge badge-primary badge-pill" style="color:black">@item.Value</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {
-    public Ordination? ordination;
-    public List<Ordination> ordinationer = new List<Ordination>();
+    private double? vægtFra = null;
+    private double? vægtTil = null;
+    private int laegemiddelId;
+    private int antal;
+    private Laegemiddel[] laegemidler = Array.Empty<Laegemiddel>();
+    private Dictionary<string, double> totalPrLægemiddel = new Dictionary<string, double>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        laegemidler = await apiService.GetLaegemidler() ?? Array.Empty<Laegemiddel>();
+        totalPrLægemiddel = await apiService.GetTotalMængdeOrdineretPrLægemiddel();
+    }
+
+    private async Task HentStatistik()
+    {
+        StatistikDTO dto = new StatistikDTO(vægtFra ?? 0, vægtTil ?? 999, laegemidler.First(l => l.LaegemiddelId == laegemiddelId).navn);
+        antal = await apiService.GetAntalOrdinationer(dto);
+    }
 }
