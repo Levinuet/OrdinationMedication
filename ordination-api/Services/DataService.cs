@@ -45,7 +45,7 @@ public class DataService
         if (laegemiddler[0] == null)
         {
             laegemiddler[0] = new Laegemiddel("Acetylsalicylsyre", 0.1, 0.15, 0.16, "Styk");
-            laegemiddler[1] = new Laegemiddel("Paracetamol", 1, 1.5, 2, "Ml");
+            laegemiddler[1] = new Laegemiddel("Paracetamol", 0.08, 0.05, 0.04, "Ml");
             laegemiddler[2] = new Laegemiddel("Fucidin", 0.025, 0.025, 0.025, "Styk");
             laegemiddler[3] = new Laegemiddel("Methotrexat", 0.01, 0.015, 0.02, "Styk");
             laegemiddler[4] = new Laegemiddel("Prednisolon", 0.1, 0.15, 0.2, "Styk");
